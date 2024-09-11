@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import web.dao.CarDAO;
 import web.models.Car;
+import web.service.CarService;
 
 import java.util.List;
 
@@ -17,28 +17,27 @@ import java.util.List;
 @RequestMapping("/cars")
 public class CarsController {
 
-    private final CarDAO carDAO;
+    private final CarService carServiceImpl;
 
     @Autowired
-    public CarsController(CarDAO carDAO) {
-        this.carDAO = carDAO;
+    public CarsController(CarService carServiceImpl) {
+        this.carServiceImpl = carServiceImpl;
     }
 
     @GetMapping()
     public String printCarsByCount(
             @RequestParam(value = "count", required = false) Integer count,
             Model model) {
-        List<Car> cars = carDAO.getLimitedCars(count);
-        if (cars.isEmpty()) {
-            model.addAttribute("error", "No cars found");
+        if(count == null) {
+            count = Integer.MAX_VALUE;
         }
-        model.addAttribute("cars", cars);
+        model.addAttribute("cars", carServiceImpl.getLimitedCars(count));
         return "cars/cars";
     }
 
     @GetMapping("/{id}")
     public String printCarById(@PathVariable("id") int id, Model model) {
-        model.addAttribute("car", carDAO.getCarById(id));
+        model.addAttribute("car", carServiceImpl.getCarById(id));
         return "cars/carInfo";
     }
 
